@@ -1,6 +1,8 @@
 import ssl
 import urllib
 import argparse
+import os
+import subprocess
 
 
 def updateDatabase():
@@ -24,3 +26,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.update:
         updateDatabase()
+        exit(0)
+
+    if os.path.isdir(args.FILE):
+        print("Is a directory")
+    else:
+        checksum = subprocess.check_output(["shasum", args.FILE])
+        checksum = checksum.decode('ASCII')
+        checksum = checksum.split()
+        checksum = checksum[0].rstrip('\n')
+        safe = False
+        whitelist = open("whitelist.txt", "r")
+        for line in whitelist:
+            if line.rstrip('\n') == checksum:
+                safe = True
+                break
+        if safe:
+            print("File is safe")
+
