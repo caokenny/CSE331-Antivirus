@@ -43,4 +43,3 @@ if __name__ == "__main__":
                 break
         if safe:
             print("File is safe")
-
