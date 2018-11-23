@@ -17,6 +17,33 @@ def updateDatabase():
     with urllib.request.urlopen(url, context=ctx) as u:
         whitelist.write(u.read().decode('ASCII'))
 
+    whitelist.close()
+
+
+def scanDir(directory):
+    filesInDir = subprocess.check_output(["ls", "-1", directory])
+    filesInDir = filesInDir.decode('ASCII')
+    filesInDir = filesInDir.split('\n')
+    filesInDir.pop(len(filesInDir) - 1)
+    for i in range(len(filesInDir)):
+        if os.path.isdir(directory + "/" + filesInDir[i]):
+            scanDir(directory + "/" + filesInDir[i])
+        else:
+            checksum = subprocess.check_output(["shasum", directory + "/" + filesInDir[i]])
+            checksum = checksum.decode('ASCII')
+            checksum = checksum.split()
+            checksum = checksum[0].rstrip('\n')
+            safe = False
+            whitelist = open("whitelist.txt", "r")
+            for line in whitelist:
+                if line.rstrip('\n') == checksum:
+                    safe = True
+                    break
+            if safe:
+                print("File is safe")
+
+
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("Linux Antivirus")
@@ -29,7 +56,7 @@ if __name__ == "__main__":
         exit(0)
 
     if os.path.isdir(args.FILE):
-        print("Is a directory")
+        scanDir(args.FILE)
     else:
         checksum = subprocess.check_output(["shasum", args.FILE])
         checksum = checksum.decode('ASCII')
