@@ -20,6 +20,25 @@ def updateDatabase():
     whitelist.close()
 
 
+def scanFile(fileName):
+    checksum = subprocess.check_output(["shasum", fileName])
+    checksum = checksum.decode('ASCII')
+    checksum = checksum.split()
+    checksum = checksum[0].rstrip('\n')
+    safe = False
+    whitelist = open("whitelist.txt", "r")
+    for line in whitelist:
+        if line.rstrip('\n') == checksum:
+            safe = True
+            break
+    whitelist.close()
+    if safe:
+        return True
+    else:
+        #CHECK WITH VIRUS DATABASE TO SEE IF VIRUS
+
+
+
 def scanDir(directory):
     filesInDir = subprocess.check_output(["ls", "-1", directory])
     filesInDir = filesInDir.decode('ASCII')
@@ -29,28 +48,23 @@ def scanDir(directory):
         if os.path.isdir(directory + "/" + filesInDir[i]):
             scanDir(directory + "/" + filesInDir[i])
         else:
-            checksum = subprocess.check_output(["shasum", directory + "/" + filesInDir[i]])
-            checksum = checksum.decode('ASCII')
-            checksum = checksum.split()
-            checksum = checksum[0].rstrip('\n')
-            safe = False
-            whitelist = open("whitelist.txt", "r")
-            for line in whitelist:
-                if line.rstrip('\n') == checksum:
-                    safe = True
-                    break
-            if safe:
-                print("File is safe")
+            if scanFile(directory + "/" + filesInDir[i]) is False:
+                #CHANGE FILE PERMISSIONS AND CHANGE TO .INFECTED
+
 
 
 
 
 if __name__ == "__main__":
+    ##############PARSING STUFF##############
     parser = argparse.ArgumentParser("Linux Antivirus")
     parser.add_argument("FILE", help="Directory or filename to scan")
     parser.add_argument("-u", "--update", help="Update virus and whitelist database",
                         action="store_true")
     args = parser.parse_args()
+    ##############PARSING STUFF ENDS##############
+
+    #IF UPDATE IS TRUE, UPDATE DATABASE AND EXIT
     if args.update:
         updateDatabase()
         exit(0)
@@ -58,15 +72,5 @@ if __name__ == "__main__":
     if os.path.isdir(args.FILE):
         scanDir(args.FILE)
     else:
-        checksum = subprocess.check_output(["shasum", args.FILE])
-        checksum = checksum.decode('ASCII')
-        checksum = checksum.split()
-        checksum = checksum[0].rstrip('\n')
-        safe = False
-        whitelist = open("whitelist.txt", "r")
-        for line in whitelist:
-            if line.rstrip('\n') == checksum:
-                safe = True
-                break
-        if safe:
-            print("File is safe")
+        if scanFile(args.FILE) is False:
+            #CHANGE PERMISSIONS AND ADD .INFECTED
