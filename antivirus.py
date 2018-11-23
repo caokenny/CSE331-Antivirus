@@ -36,6 +36,7 @@ def scanFile(fileName):
         return True
     else:
         #CHECK WITH VIRUS DATABASE TO SEE IF VIRUS
+        return False
 
 
 
@@ -50,6 +51,7 @@ def scanDir(directory):
         else:
             if scanFile(directory + "/" + filesInDir[i]) is False:
                 #CHANGE FILE PERMISSIONS AND CHANGE TO .INFECTED
+                print("IDk yet")
 
 
 
@@ -61,6 +63,8 @@ if __name__ == "__main__":
     parser.add_argument("FILE", help="Directory or filename to scan")
     parser.add_argument("-u", "--update", help="Update virus and whitelist database",
                         action="store_true")
+    parser.add_argument("-a", "--access", help="Antivirus will run in the background, scanning files before opened",
+                        action="store_true")
     args = parser.parse_args()
     ##############PARSING STUFF ENDS##############
 
@@ -69,8 +73,12 @@ if __name__ == "__main__":
         updateDatabase()
         exit(0)
 
+    if args.access:
+        #LINK ON ACCESS SCANNING CODE TO SCAN OPENED FILES
+
     if os.path.isdir(args.FILE):
         scanDir(args.FILE)
     else:
         if scanFile(args.FILE) is False:
             #CHANGE PERMISSIONS AND ADD .INFECTED
+            print("IDK YET")
