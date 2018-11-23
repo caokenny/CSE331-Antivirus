@@ -30,7 +30,7 @@ python3 antivirus.py --file file.txt
 ```
 NOTE: file name must be an absolute path if the file is not in the same directory as antivirus.py.
 
-For example if file.txt is loacted on my Desktop:
+For example if file.txt is located on my Desktop:
 ```
 python3 antivirus.py -f /Users/KennyCao/Desktop/file.txt
 ```
