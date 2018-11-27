@@ -1,0 +1,90 @@
+#!/usr/bin/env python3
+
+import ssl
+import urllib.request
+import argparse
+import os
+import subprocess
+import binascii
+import sys
+
+
+def updateDatabase():
+    url = "https://rawcdn.githack.com/caokenny/CSE331-Antivirus/59266d4a9e1c4840550e95afa7565e7217f90e16/whitelist.txt"
+
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+
+    whitelist = open("whitelist.txt", "w")
+
+    with urllib.request.urlopen(url, context=ctx) as u:
+        whitelist.write(u.read().decode('ASCII'))
+
+    whitelist.close()
+
+def scanFile(file):
+    checksum = subprocess.check_output(["shasum", file]).decode('ASCII').split()[0]
+    whitelist = open("whitelist.txt", "r")
+    for line in whitelist:
+        if line.rstrip('\n') == checksum:
+            whitelist.close()
+            return True
+
+    viruslist = open("viruslist.txt", "r")
+    with open(file, "rb") as binaryFile:
+        contentInBinary = binaryFile.read()
+        contentInHex = binascii.hexlify(contentInBinary)
+        # fix this line
+        content = contentInHex.decode()
+        for line in viruslist:
+            line = line.rstrip('\n').split(" ").join()
+            if line in content:
+                os.chmod(file, 000)
+                os.rename(file, file + ".infected")
+                sys.stdout.write("Virus detected: " + file)
+                return False
+    return False
+
+def scanDir(dir):
+    filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('ascii').split('\n').pop()
+    for file in filesInDir:
+        filePath = os.path.join(dir, file)
+        if os.path.isdir(filePath):
+            scanDir(filePath)
+        elif os.path.isfile(filePath):
+            scanFile(filePath)
+
+if __name__ == "__main__":
+    # create ArgumentParser
+    parser = argparse.ArgumentParser(description="Antivirus for Linux")
+
+    # fill ArgumentParser with information about program arguments
+    parser.add_argument("-f", "--file", help="a file or directory for scanning")
+    parser.add_argument("-u", "--update", help="update whitelist and viruslist database",
+                        action="store_true")
+    parser.add_argument("-a", "--access", help="antivirus will run in the background and scan files before they are opened",
+                         action="store_true")
+
+    # parse command-line arguments
+    # if parse_args() is called with no args, ArgumentParser will automatically determine the command-line args from sys.argv
+    args = parser.parse_args()
+
+    # if update is true, update whitelist and viruslist database
+    if args.update:
+        updateDatabase()
+
+    if args.file is not None:
+        # if absolute path of file/directory is not provided, get the absolute path
+        if not os.path.isabs(args.file):
+            fileAbsPath = os.path.abspath(args.file)
+
+        # if a directory is provided, scan it and exit
+        if os.path.isdir(fileAbsPath):
+            scanDir(fileAbsPath)
+            exit(0)
+
+        # if a file is provided, scan it and exit
+        elif os.path.isFile(fileAbsPath):
+            scanFile(fileAbsPath)
+            exit(0)
