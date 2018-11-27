@@ -1,42 +1,36 @@
-# CSE331-Antivirus
+# CSE331 Project - Antivirus for Linux
 ```
-usage: Linux Antivirus [-h] [-f FILE] [-u]
+usage: antivirus [-h] [-f FILE] [-u]
 
 optional arguments:
 
   -h, --help            show this help message and exit
   
-  -f FILE, --file FILE  Directory or filename to scan
+  -f FILE, --file FILE  a file or directory for scanning
   
-  -u, --update          Update virus and whitelist database
+  -u, --update          update whitelist and viruslist database
 ```
 
-## Updating Whitelist/Virus Database
+## Update Whitelist/Viruslist Database
 ```
-python3 antivirus.py -u
+antivirus -u
 ```
 OR
 ```
-python3 antivirus.py --update
+antivirus --update
 ```
 
 ## On Demand Scanning
 ```
-python3 antivirus.py -f file.txt
+antivirus -f FILE
 ```
 OR
 ```
-python3 antivirus.py --file file.txt
-```
-NOTE: file name must be an absolute path if the file is not in the same directory as antivirus.py.
-
-For example if file.txt is located on my Desktop:
-```
-python3 antivirus.py -f /Users/KennyCao/Desktop/file.txt
+python3 antivirus.py --file FILE
 ```
 
 ## On Access Scanning
 ```
-python3 antivirus.py
+antivirus
 ```
 Simply run antivirus.py with no flags or arguments
