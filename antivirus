@@ -7,6 +7,7 @@ import os
 import subprocess
 import binascii
 import sys
+import os.path
 
 
 def updateDatabase():
@@ -78,6 +79,7 @@ if __name__ == "__main__":
         # if absolute path of file/directory is not provided, get the absolute path
         if not os.path.isabs(args.file):
             fileAbsPath = os.path.abspath(args.file)
+            sys.stdout.write(fileAbsPath + "\n")
 
         # if a directory is provided, scan it and exit
         if os.path.isdir(fileAbsPath):
@@ -85,6 +87,6 @@ if __name__ == "__main__":
             exit(0)
 
         # if a file is provided, scan it and exit
-        elif os.path.isFile(fileAbsPath):
+        elif os.path.isfile(fileAbsPath):
             scanFile(fileAbsPath)
             exit(0)
