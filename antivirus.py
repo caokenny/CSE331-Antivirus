@@ -11,7 +11,7 @@ import os.path
 
 
 def updateDatabase():
-    url = "https://rawcdn.githack.com/caokenny/CSE331-Antivirus/59266d4a9e1c4840550e95afa7565e7217f90e16/whitelist.txt"
+    url = "https://raw.githubusercontent.com/caokenny/CSE331-Antivirus/master/whitelist.txt"
 
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
