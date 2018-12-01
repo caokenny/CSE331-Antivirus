@@ -8,7 +8,7 @@ optional arguments:
   
   -f FILE, --file FILE  a file or directory for scanning
   
-  -u, --update          update whitelist and viruslist database
+  -u, --update          update whitelist and viruses database
 ```
 
 ## Update Whitelist/Viruslist Database
