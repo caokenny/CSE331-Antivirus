@@ -1,0 +1,6 @@
+virus-1, 76 69 72 75 73 2d 31
+trojan-1, 74 72 6f 6a 61 6e 2d 31
+worm-1, 77 6f 72 6d 2d 31
+virus-2, 76 69 72 75 73 2d 32 a0
+trojan-2, 74 72 6f 6a 61 6e 2d 32 a0
+worm-2, 77 6f 72 6d 2d 32 a0 
