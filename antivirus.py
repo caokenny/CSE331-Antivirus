@@ -32,29 +32,29 @@ def scanFile(file):
             whitelist.close()
             return True
 
-    viruslist = open("viruslist.txt", "r")
-    with open(file, "rb") as binaryFile:
-        contentInBinary = binaryFile.read()
-        contentInHex = binascii.hexlify(contentInBinary)
-        # fix this line
-        content = contentInHex.decode()
-        for line in viruslist:
-            line = line.rstrip('\n').split(" ").join()
+    viruses = open("viruses.txt", "r")
+    with open(file, "rb") as f:
+        content = binascii.hexlify(f.read()).decode("utf-8")
+        for line in viruses:
+            line = line.split(",")[1].rstrip('\n').split(" ")
+            line = "".join(line)
             if line in content:
                 os.chmod(file, 000)
                 os.rename(file, file + ".infected")
-                sys.stdout.write("Virus detected: " + file)
+                sys.stdout.write("Virus detected: " + file + "\n")
                 return False
     return False
 
 def scanDir(dir):
-    filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('ascii').split('\n').pop()
+    filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('ASCII')
+    filesInDir = filesInDir.split("\n")[2:]
+    filesInDir.pop(len(filesInDir)-1)
     for file in filesInDir:
         filePath = os.path.join(dir, file)
-        if os.path.isdir(filePath):
-            scanDir(filePath)
-        elif os.path.isfile(filePath):
+        if os.path.isfile(filePath):
             scanFile(filePath)
+        elif os.path.isdir(filePath):
+            scanDir(filePath)
 
 if __name__ == "__main__":
     # create ArgumentParser
@@ -79,14 +79,14 @@ if __name__ == "__main__":
         # if absolute path of file/directory is not provided, get the absolute path
         if not os.path.isabs(args.file):
             fileAbsPath = os.path.abspath(args.file)
-            sys.stdout.write(fileAbsPath + "\n")
-
-        # if a directory is provided, scan it and exit
-        if os.path.isdir(fileAbsPath):
-            scanDir(fileAbsPath)
+        else:
+            fileAbsPath = args.file
+        # if a file is provided, scan it and exit
+        if os.path.isfile(fileAbsPath):
+            scanFile(fileAbsPath)
             exit(0)
 
-        # if a file is provided, scan it and exit
-        elif os.path.isfile(fileAbsPath):
-            scanFile(fileAbsPath)
+        # if a directory is provided, scan it and exit
+        elif os.path.isdir(fileAbsPath):
+            scanDir(fileAbsPath)
             exit(0)
