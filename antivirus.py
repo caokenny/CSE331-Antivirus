@@ -11,18 +11,22 @@ import os.path
 
 
 def updateDatabase():
-    url = "https://raw.githubusercontent.com/caokenny/CSE331-Antivirus/master/whitelist.txt"
+    whitelistURL = "https://raw.githubusercontent.com/caokenny/CSE331-Antivirus/master/whitelist.txt"
+    virusesURL = "https://raw.githubusercontent.com/caokenny/CSE331-Antivirus/master/viruses.txt"
 
     ctx = ssl.create_default_context()
     ctx.check_hostname = False
     ctx.verify_mode = ssl.CERT_NONE
 
     whitelist = open("whitelist.txt", "w")
-
-    with urllib.request.urlopen(url, context=ctx) as u:
+    with urllib.request.urlopen(whitelistURL, context=ctx) as u:
         whitelist.write(u.read().decode('ASCII'))
-
     whitelist.close()
+
+    viruses = open("viruses.txt", "w")
+    with urllib.request.urlopen(virusesURL, context=ctx) as u:
+        viruses.write(u.read().decode('ASCII'))
+    viruses.close()
 
 def scanFile(file):
     checksum = subprocess.check_output(["shasum", file]).decode('ASCII').split()[0]
@@ -90,3 +94,4 @@ if __name__ == "__main__":
         elif os.path.isdir(fileAbsPath):
             scanDir(fileAbsPath)
             exit(0)
+
