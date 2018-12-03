@@ -29,25 +29,26 @@ def updateDatabase():
     viruses.close()
 
 def scanFile(file):
-    checksum = subprocess.check_output(["shasum", file]).decode('ASCII').split()[0]
-    whitelist = open("whitelist.txt", "r")
-    for line in whitelist:
-        if line.rstrip('\n') == checksum:
-            whitelist.close()
-            return True
+    if os.access(file, os.R_OK):
+        checksum = subprocess.check_output(["shasum", file]).decode('ASCII').split()[0]
+        whitelist = open("whitelist.txt", "r")
+        for line in whitelist:
+            if line.rstrip('\n') == checksum:
+                whitelist.close()
+                return True
 
-    viruses = open("viruses.txt", "r")
-    with open(file, "rb") as f:
-        content = binascii.hexlify(f.read()).decode("utf-8")
-        for line in viruses:
-            line = line.split(",")[1].rstrip('\n').split(" ")
-            line = "".join(line)
-            if line in content:
-                os.chmod(file, 000)
-                os.rename(file, file + ".infected")
-                sys.stdout.write("Virus detected: " + file + ".infected" + "\n")
-                return False
-    return True
+        viruses = open("viruses.txt", "r")
+        with open(file, "rb") as f:
+            content = binascii.hexlify(f.read()).decode("utf-8")
+            for line in viruses:
+                line = line.split(",")[1].rstrip('\n').split(" ")
+                line = "".join(line)
+                if line in content:
+                    os.chmod(file, 000)
+                    os.rename(file, file + ".infected")
+                    sys.stdout.write("Virus detected: " + file + ".infected" + "\n")
+                    return False
+        return True
 
 def scanDir(dir):
     filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('ASCII')
