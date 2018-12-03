@@ -32,7 +32,7 @@ OR
 ```
 OR
 ```
-./python3 antivirus.py --file FILE
+./antivirus --file FILE
 ```
 
 ## On Access Scanning
