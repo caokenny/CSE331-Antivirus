@@ -45,7 +45,7 @@ def scanFile(file):
             if line in content:
                 os.chmod(file, 000)
                 os.rename(file, file + ".infected")
-                sys.stdout.write("Virus detected: " + file + "\n")
+                sys.stdout.write("Virus detected: " + file + ".infected" + "\n")
                 return False
     return False
 
