@@ -47,7 +47,7 @@ def scanFile(file):
                 os.rename(file, file + ".infected")
                 sys.stdout.write("Virus detected: " + file + ".infected" + "\n")
                 return False
-    return False
+    return True
 
 def scanDir(dir):
     filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('ASCII')
