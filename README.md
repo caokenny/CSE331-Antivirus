@@ -1,6 +1,7 @@
 # CSE331 Project - Antivirus for Linux
+Make sure the antivirus program in your current directory before running the following commands.
 ```
-usage: antivirus [-h] [-f FILE] [-u]
+usage: ./antivirus [-h] [-f FILE] [-u]
 
 optional arguments:
 
@@ -13,24 +14,24 @@ optional arguments:
 
 ## Update Whitelist/Viruslist Database
 ```
-antivirus -u
+./antivirus -u
 ```
 OR
 ```
-antivirus --update
+./antivirus --update
 ```
 
 ## On Demand Scanning
 ```
-antivirus -f FILE
+./antivirus -f FILE
 ```
 OR
 ```
-python3 antivirus.py --file FILE
+./python3 antivirus.py --file FILE
 ```
 
 ## On Access Scanning
 ```
-antivirus
+./antivirus
 ```
 Simply run antivirus.py with no flags or arguments
