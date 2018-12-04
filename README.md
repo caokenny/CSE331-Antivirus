@@ -37,6 +37,11 @@ OR
 
 ## On Access Scanning
 ```
-./antivirus
+sudo make clean all
+sudo insmod antivirus_open.ko
 ```
-Simply run antivirus.py with no flags or arguments
+
+## Stop On Accessing Scanning
+```
+sudo rmmod antivirus_open
+```
