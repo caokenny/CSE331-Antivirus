@@ -30,7 +30,7 @@ def updateDatabase():
 
 def scanFile(file):
     if os.access(file, os.R_OK):
-        checksum = subprocess.check_output(["shasum", file]).decode('ASCII').split()[0]
+        checksum = subprocess.check_output(["shasum", file]).decode('utf-8').split()[0]
         whitelist = open("whitelist.txt", "r")
         for line in whitelist:
             if line.rstrip('\n') == checksum:
@@ -38,20 +38,24 @@ def scanFile(file):
                 return True
 
         viruses = open("viruses.txt", "r")
+        chunk_size = 1024
         with open(file, "rb") as f:
-            content = binascii.hexlify(f.read()).decode("utf-8")
-            for line in viruses:
-                line = line.split(",")[1].rstrip('\n').split(" ")
-                line = "".join(line)
-                if line in content:
-                    os.chmod(file, 000)
-                    os.rename(file, file + ".infected")
-                    sys.stdout.write("Virus detected: " + file + ".infected" + "\n")
-                    return False
+        	while True:
+	            content = binascii.hexlify(f.read()).decode("utf-8")
+	            if not content:
+	            	break
+	            for line in viruses:
+	                line = line.split(",")[1].rstrip('\n').split(" ")
+	                line = "".join(line)
+	                if line in content:
+	                    os.chmod(file, 000)
+	                    os.rename(file, file + ".infected")
+	                    sys.stdout.write("Virus detected: " + file + ".infected" + "\n")
+	                    return False
         return True
 
 def scanDir(dir):
-    filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('ASCII')
+    filesInDir = subprocess.check_output(["ls", "-a1", dir]).decode('utf-8')
     filesInDir = filesInDir.split("\n")[2:]
     filesInDir.pop(len(filesInDir)-1)
     for file in filesInDir:
