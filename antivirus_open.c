@@ -4,13 +4,15 @@
 #include <linux/kmod.h>
 #include <linux/unistd.h>
 #include <linux/mutex.h>
+#include <linux/slab.h>
+#include <linux/vmalloc.h>
 
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Alan <ex0dus@codemuch.tech>");
 
-unsigned long *sys_call_table = (unsigned long*) 0xdd8ae1e0;
-static DEFINE_MUTEX(my_mutex);
+unsigned long *sys_call_table = (unsigned long*) 0xc78ae1e0;
+// static DEFINE_MUTEX(my_mutex);
 
 /* This defines a pointer to the real open() syscall */
 asmlinkage int (*old_open)(const char *filename, int flags, int mode);
@@ -44,46 +46,69 @@ set_addr_ro(long unsigned int _addr)
 //     return (*old_execve) (filename, argv, envp);
 // }
 
+bool startsWith(const char *a, const char *b) {
+	if (strncmp(a, b, strlen(b)) == 0) return 1;
+	return 0;
+}
+
 
 asmlinkage int
 new_open(const char *filename, int flags, int mode)
 {
 
-    if (!mutex_trylock(&my_mutex)) {
-        printk(KERN_ALERT "MUTEX: In use by another process\n");
-        return -EBUSY;
+    // if (!mutex_trylock(&my_mutex)) {
+    //     printk(KERN_ALERT "MUTEX: In use by another process\n");
+    //     return -EBUSY;
+    // }
+
+    if (startsWith(filename, "/home") && flags == 32768 && mode == 0) {
+    	printk(KERN_INFO "Intercepting open(%s, %X, %X)\n", filename, flags, mode);
+
+	    char* script = "python3 /home/CSE331-Antivirus/onaccess.py ";
+	    char *full = vmalloc(strlen(script)+strlen(filename)+1);
+
+	    strcpy(full, script);
+	    strcat(full, filename);
+
+	    printk(KERN_ALERT "cmmond: %s\n", full);
+
+
+	    // sys_call_table[__NR_open] = old_open;
+
+	    char *argv[] = {"/usr/bin/xterm", "-hold", "-e", full, NULL};
+	    char *envp[] = {
+	        "HOME=/home/kenny",
+	        "TERM=xterm-256color",
+	        "USER=kenny",
+	        "SHELL=/bin/bash",
+	        "DISPLAY=:0", 
+	        "PATH=/home/kenny/bin:/home/kenny/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin",
+	        "PWD=/home/kenny", NULL
+	    };
+
+	    int result = call_usermodehelper(argv[0], argv, envp, UMH_WAIT_EXEC);
+
+	    // (*old_execve)(argv[0], argv, envp);
+
+
+	    printk(KERN_ALERT "result = %d\n", result);
+
+	    vfree(full);
+
+	    // sys_call_table[__NR_open] = new_open;
+
+
+	    // mutex_unlock(&my_mutex);
+	    // printk(KERN_ALERT "MUTEX: unlocked\n");
+
+
+
+	   
+	    // return NULL;
     }
 
-    printk(KERN_INFO "Intercepting open(%s, %X, %X)\n", filename, flags, mode);
-
-    sys_call_table[__NR_open] = old_open;
-
-    char *argv[] = {"./antivirus", "-f", filename, NULL};
-    char *envp[] = {
-        "HOME=/",
-        "TERM=xterm-256color",
-        "USER=root",
-        "SHELL=/bin/bash",
-        "DISPLAY=:0",
-        "PATH=/usr/bin:/bin", NULL
-    };
-
-    int result = call_usermodehelper(argv[0], argv, envp, UMH_WAIT_PROC);
-
-
-    // printk(KERN_ALERT "result = %d\n", result);
-
-    sys_call_table[__NR_open] = new_open;
-
-
-    mutex_unlock(&my_mutex);
-    printk(KERN_ALERT "MUTEX: unlocked\n");
-
-
-
     /* give execution BACK to the original syscall */
-    return (*old_open)(filename, flags, mode);
-    // return NULL;
+	return (*old_open)(filename, flags, mode);
 }
 
 static int __init
